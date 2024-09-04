@@ -23,6 +23,9 @@ class TaskEditLayout extends Rows
     protected function fields(): iterable
     {
         return [
+            Input::make('task.id')
+                ->type('hidden'),
+
             Input::make('task.name')
                 ->type('text')
                 ->required()

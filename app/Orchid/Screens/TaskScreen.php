@@ -67,18 +67,30 @@ class TaskScreen extends Screen
     }
 
     // edit task
-    public function editTask(Request $request,Task $task)
+    public function editTask(Request $request, Task $task)
     {
         $request->validate([
             'task.name' => [
                 'required'
             ],
         ]);
-
-        $task->fill($request->input('name'))->save();
+        $task->name = $request->input('task.name');
+        $task->save();
 
         Toast::info(__('Task was updated.'));
-            return $task;
+
+    }
+
+    /**
+     * Loads task data when opening the modal window.
+     *
+     * @return array
+     */
+    public function loadُTaskOnOpenModal(Task $task): iterable
+    {
+        return [
+            'task' => $task
+        ];
     }
 
     /**
@@ -96,17 +108,7 @@ class TaskScreen extends Screen
         ];
     }
 
-    /**
-     * Loads user data when opening the modal window.
-     *
-     * @return array
-     */
-    public function loadُTaskOnOpenModal(Task $task): iterable
-    {
-        return [
-                'task'  => $task
-        ];
-    }
+
 
     /**
      * The screen's layout elements.
@@ -118,22 +120,19 @@ class TaskScreen extends Screen
         return [
 
             // edit modal
-            Layout::modal('editTaskModal',TaskEditLayout::class)
+            Layout::modal('editTaskModal', TaskEditLayout::class)
                 ->deferred('loadُTaskOnOpenModal'),
             // end edit modal
 
             Layout::table('tasks', [
-                TD::make('id','شناسه'),
-                TD::make('name','نام'),
+                TD::make('id', 'شناسه'),
+                TD::make('name', 'نام'),
 
                 // edit task button
-                TD::make('name', __('نام'))
-                    ->sort()
-                    ->cantHide()
-                    ->filter(Input::make())
-                    ->render(fn (Task $task) => ModalToggle::make($task->name)
+                TD::make('name', __('ویرایش'))
+                    ->render( fn (Task $task) => ModalToggle::make($task->name)
                         ->modal('editTaskModal')
-                        ->modalTitle($task->name)
+                        ->modalTitle('ویرایش')
                         ->method('editTask')
                         ->asyncParameters([
                             'task' => $task->id,
@@ -148,7 +147,7 @@ class TaskScreen extends Screen
                             ->confirm('بعد از حذف این آیتم دیگر به آن دسترسی ندارید')
                             ->method('delete', ['task' => $task->id]);
                     }),
-                 // end delete
+                // end delete
             ]),
             // create model modal
             Layout::modal('taskModal', Layout::rows([
